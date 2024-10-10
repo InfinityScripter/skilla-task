@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Call } from '@/types/callTypes';
+import { Call } from '@/types/callTypes.ts';
 import {fetchCalls} from "@/lib/services/callService.ts";
 
 const CallList: React.FC = () => {
@@ -21,15 +21,15 @@ const CallList: React.FC = () => {
     }, []);
 
     return (
-        <div>
+        <div className="border-green-600 border-2 border-solid">
             <h1>Список звонков</h1>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {!error && calls.length === 0 && <p>Загрузка звонков...</p>}
             {calls.length > 0 && (
                 <ul>
-                    {calls.map((call) => (
+                    {calls.map((call,id) => (
                         <li key={call.id}>
-                            Звонок от {call.from_number} на {call.to_number}, статус: {call.status}, id: {call.id}, Partner: {call.partner_data.name}
+                            id: {id} Звонок от {call.from_number} на {call.to_number}, статус: {call.status}, id: {call.id}, Partner: {call.partner_data.name}
                         </li>
                     ))}
                 </ul>

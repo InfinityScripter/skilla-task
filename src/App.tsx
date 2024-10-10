@@ -1,14 +1,13 @@
-
 import './App.css'
-import CallList from "@/components/CallList.tsx";
+import Home from "@/pages/home";
 
 function App() {
 
-  return (
-    <>
-<CallList/>
-    </>
-  )
+    return (
+        <>
+            <Home/>
+        </>
+    )
 }
 
 export default App
