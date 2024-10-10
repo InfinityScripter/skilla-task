@@ -1,12 +1,12 @@
 
 import './App.css'
+import CallList from "@/components/CallList.tsx";
 
 function App() {
 
   return (
     <>
-      <h1>Hello</h1>
-
+<CallList/>
     </>
   )
 }
