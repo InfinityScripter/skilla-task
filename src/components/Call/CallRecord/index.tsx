@@ -5,12 +5,13 @@ import { Progress } from "@/components/ui/progress";
 import { fetchCallRecord } from "@/lib/services/callService";
 import { formatTimePlayer } from "@/lib/utils.ts";
 
+const callRecordCache = new Map<string, string>();
+
 interface CallRecordProps {
     recordId: string;
     partnershipId: string;
     onPlayStateChange?: (isPlaying: boolean) => void;
 }
-
 
 const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -26,27 +27,22 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
                     return;
                 }
 
+                if (callRecordCache.has(recordId)) {
+                    const cachedAudioUrl = callRecordCache.get(recordId);
+                    setAudioUrl(cachedAudioUrl!);
+                    const newAudio = new Audio(cachedAudioUrl!);
+                    setupAudio(newAudio);
+                    return;
+                }
+
                 const audioBlob = await fetchCallRecord(recordId, partnershipId);
                 const audioUrl = URL.createObjectURL(audioBlob);
+
+                callRecordCache.set(recordId, audioUrl);
+
                 setAudioUrl(audioUrl);
                 const newAudio = new Audio(audioUrl);
-
-                newAudio.onloadedmetadata = () => {
-                    setProgress(0);
-                };
-
-                newAudio.ontimeupdate = () => {
-                    setCurrentTime(newAudio.currentTime);
-                    setProgress((newAudio.currentTime / newAudio.duration) * 100);
-                };
-
-                newAudio.onended = () => {
-                    setIsPlaying(false);
-                    setCurrentTime(0);
-                    setProgress(0);
-                };
-
-                setAudio(newAudio);
+                setupAudio(newAudio);
             } catch (error) {
                 console.error("Ошибка при получении записи:", error);
             }
@@ -54,6 +50,25 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
 
         loadRecord();
     }, [recordId, partnershipId]);
+
+    const setupAudio = (newAudio: HTMLAudioElement) => {
+        newAudio.onloadedmetadata = () => {
+            setProgress(0);
+        };
+
+        newAudio.ontimeupdate = () => {
+            setCurrentTime(newAudio.currentTime);
+            setProgress((newAudio.currentTime / newAudio.duration) * 100);
+        };
+
+        newAudio.onended = () => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+            setProgress(0);
+        };
+
+        setAudio(newAudio);
+    };
 
     const handlePlayPause = () => {
         if (!audio) return;

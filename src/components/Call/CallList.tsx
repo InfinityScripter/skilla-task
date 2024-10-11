@@ -26,6 +26,7 @@ const CallList = () => {
     const { filteredCalls, loadCalls, setSortOrder } = useContext(CallContext)!;
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
+    const [hoveredRow, setHoveredRow] = useState<number | null>(null); // Для отслеживания строки, на которую наведен курсор
 
     const handleSortChange = (column: string) => {
         const newOrder = sortBy === column && order === 'ASC' ? 'DESC' : 'ASC';
@@ -37,7 +38,7 @@ const CallList = () => {
 
     const getChevronIcon = (column: string) => {
         if (sortBy === column) {
-            return order === 'ASC' ? <ChevronUp  size={20} /> : <ChevronDown size={20} />;
+            return order === 'ASC' ? <ChevronUp size={20} /> : <ChevronDown size={20} />;
         }
         return <ChevronDown size={16} />;
     };
@@ -48,14 +49,14 @@ const CallList = () => {
             {filteredCalls.length > 0 && (
                 <Table>
                     <TableHeader>
-                        <TableRow >
+                        <TableRow>
                             <TableHead className="table-header-font  pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
                             <TableHead
                                 className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer"
                                 onClick={() => handleSortChange('date')}
                             >
                                 <div className="flex flex-row justify-center content-center gap-2">
-                                Время {getChevronIcon('date')}
+                                    Время {getChevronIcon('date')}
                                 </div>
                             </TableHead>
 
@@ -76,10 +77,15 @@ const CallList = () => {
                     </TableHeader>
 
                     <TableBody>
-                        {filteredCalls.map((call) => {
+                        {filteredCalls.map((call, index) => {
                             const rating = getRandomRating();
                             return (
-                                <TableRow className="text-left h-[65px] group" key={call.id}>
+                                <TableRow
+                                    key={call.id}
+                                    className="text-left h-[65px] group"
+                                    onMouseEnter={() => setHoveredRow(index)} // Отслеживание наведения мыши
+                                    onMouseLeave={() => setHoveredRow(null)} // Сброс при уходе мыши
+                                >
                                     <TableCell className="pl-5 pr-5">{getCallIcon(call.in_out, call.status)}</TableCell>
                                     <TableCell className="pl-5 pr-5">{formatTime(call.date)}</TableCell>
                                     <TableCell className="pl-5 pr-5">
@@ -96,12 +102,16 @@ const CallList = () => {
                                     </TableCell>
 
                                     <TableCell className="text-right w-[320px]">
-                                        <CallRecord
-                                            recordId={call.record}
-                                            partnershipId={call.partnership_id}
-                                        />
+                                        {hoveredRow === index ? (
+                                            <CallRecord
+                                                recordId={call.record}
+                                                partnershipId={call.partnership_id}
+                                            />
+                                        ) : (
+                                            // Если не под курсором, показывать длительность
+                                            <span className="pl-5 pr-5 text-right">{formatDuration(call.time)}</span>
+                                        )}
                                     </TableCell>
-                                    <TableCell className="text-right pl-5 pr-5">{formatDuration(call.time)}</TableCell>
                                 </TableRow>
                             );
                         })}
