@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { CallContext } from "@/context/CallContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +11,7 @@ import MissedInIcon from "@/assets/icons/missed_in.svg";
 import MissedOutIcon from "@/assets/icons/missed_out.svg";
 import CallRecord from "@/components/Call/CallRecord";
 
+// Функция для получения иконки звонка
 const getCallIcon = (in_out: number | undefined, status: string) => {
     if (in_out === 1) {
         if (status === 'Не дозвонился') return <img className="text-center" src={MissedInIcon} alt="Пропущенный входящий звонок" />;
@@ -27,6 +28,15 @@ const CallList = () => {
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
     const [hoveredRow, setHoveredRow] = useState<number | null>(null); // Для отслеживания строки, на которую наведен курсор
+
+    const ratingsCache = useRef<{ [key: string]: string }>({});
+
+    const getRating = (callId: string) => {
+        if (!ratingsCache.current[callId]) {
+            ratingsCache.current[callId] = getRandomRating();
+        }
+        return ratingsCache.current[callId];
+    };
 
     const handleSortChange = (column: string) => {
         const newOrder = sortBy === column && order === 'ASC' ? 'DESC' : 'ASC';
@@ -78,13 +88,13 @@ const CallList = () => {
 
                     <TableBody>
                         {filteredCalls.map((call, index) => {
-                            const rating = getRandomRating();
+                            const rating = getRating(call.id);
                             return (
                                 <TableRow
                                     key={call.id}
                                     className="text-left h-[65px] group"
-                                    onMouseEnter={() => setHoveredRow(index)} // Отслеживание наведения мыши
-                                    onMouseLeave={() => setHoveredRow(null)} // Сброс при уходе мыши
+                                    onMouseEnter={() => setHoveredRow(index)}
+                                    onMouseLeave={() => setHoveredRow(null)}
                                 >
                                     <TableCell className="pl-5 pr-5">{getCallIcon(call.in_out, call.status)}</TableCell>
                                     <TableCell className="pl-5 pr-5">{formatTime(call.date)}</TableCell>
