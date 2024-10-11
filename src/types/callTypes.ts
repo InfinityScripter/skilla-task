@@ -4,7 +4,14 @@ export interface PartnerData {
     phone: string;
 }
 
-export interface Call {
+export const callTypeMapping: { [key: string]: string } = {
+    '1': "входящий звонок",
+    '0': "исходящий звонок",
+    'all': "все звонки",
+};
+
+
+export interface CallInterface {
     id: number;
     partnership_id: string;
     partner_data: PartnerData;
@@ -20,7 +27,7 @@ export interface Call {
     record: string;
     line_number: string;
     line_name: string;
-    in_out: number;
+    in_out: 1 | 0| undefined;
     from_site: number;
     source: string;
     errors: string[];
@@ -42,5 +49,5 @@ export interface Call {
 
 export interface CallsApiResponse {
     total_rows: string;
-    results: Call[];
+    results: CallInterface[];
 }

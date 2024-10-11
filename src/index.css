@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+:root {
+    --font-family: "SF Pro Display", sans-serif;
+    --second-family: "SF Compact Display", sans-serif;
+}
+
+
+body {
+    font-family: var(--font-family), sans-serif;
+    font-weight: 400;
+    line-height: 100%;
+    background-color: #F1F4F9;
+}
+
+.table-header-font {
+    @apply font-sans font-normal text-sm leading-[148%] text-[#5e7793] opacity-85;
+    font-family: var(--font-family), sans-serif;
+}

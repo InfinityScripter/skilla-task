@@ -1,12 +1,10 @@
-import CallFilter from "@/components/Call/CallFilter.tsx";
+import CallFilter from "@/components/Call/CallFilter";
 import CallList from "@/components/Call/CallList.tsx";
-import CallHeader from "@/components/Call/CallHeader.tsx";
 
 const Home = () => {
     return (
-        <div>
+        <div className="w-auto">
             <CallFilter/>
-            <CallHeader/>
             <CallList/>
         </div>
     );

@@ -4,17 +4,18 @@ import { fetchCalls } from "@/lib/services/callService.ts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge.tsx";
-import {getBadgeVariant, getRandomRating} from "@/lib/utils.ts";
+import { formatDuration, formatPhoneNumber, formatTime, getBadgeVariant, getRandomRating } from "@/lib/utils.ts";
 
 import CallInIcon from '@/assets/icons/call_in.svg';
 import CallOutIcon from '@/assets/icons/call_out.svg';
 import MissedInIcon from '@/assets/icons/missed_in.svg';
 import MissedOutIcon from '@/assets/icons/missed_out.svg';
+import CallRecord from "@/components/Call/CallRecord";
 
 
 const getCallIcon = (in_out: number | undefined, status: string) => {
     if (in_out === 1) {
-        if (status === 'Не дозвонился') return <img src={MissedInIcon} alt="Пропущенный входящий звонок" />;
+        if (status === 'Не дозвонился') return <img className="text-center" src={MissedInIcon} alt="Пропущенный входящий звонок" />;
         return <img src={CallInIcon} alt="Входящий звонок" />;
     } else if (in_out === 0) {
         if (status === 'Не дозвонился') return <img src={MissedOutIcon} alt="Пропущенный исходящий звонок" />;
@@ -55,7 +56,7 @@ const CallList = () => {
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Звонок</TableHead>
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Источник</TableHead>
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Оценка</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Длительность</TableHead>
+                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5 text-right" colSpan={2}>Длительность</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -63,22 +64,28 @@ const CallList = () => {
                         {calls.map((call) => {
                             const rating = getRandomRating();
                             return (
-                                <TableRow key={call.id}>
-                                    <TableCell className="w-[25px]">{getCallIcon(call.in_out, call.status)}</TableCell>
-                                    <TableCell>{new Date(call.date).toLocaleTimeString()}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-2">
-                                            <Avatar>
-                                                <AvatarImage src={call.person_avatar} alt={call.person_name} />
-                                            </Avatar>
-                                        </div>
+                                <TableRow className="text-left h-[65px] group" key={call.id}>
+                                    <TableCell className="pl-5 pr-5">{getCallIcon(call.in_out, call.status)}</TableCell>
+                                    <TableCell className="pl-5 pr-5">{formatTime(call.date)}</TableCell>
+                                    <TableCell className="pl-5 pr-5">
+                                        <Avatar>
+                                            <AvatarImage src={call.person_avatar} alt={call.person_name} />
+                                        </Avatar>
                                     </TableCell>
-                                    <TableCell>{call.partner_data.phone}</TableCell>
-                                    <TableCell>{call.partner_data.name}</TableCell>
-                                    <TableCell className="text-left">
+                                    <TableCell className="pl-5 pr-5">
+                                        {formatPhoneNumber(call.partner_data.phone)}
+                                    </TableCell>
+                                    <TableCell className="pl-5 pr-5">{call.contact_company}</TableCell>
+                                    <TableCell className="pl-5 pr-5">
                                         <Badge variant={getBadgeVariant(rating)}>{rating}</Badge>
                                     </TableCell>
-                                    <TableCell>{call.time}</TableCell>
+
+                                    <TableCell className="text-right   w-[320px]" >
+                                        <div className="hidden group-hover:block">
+                                            <CallRecord recordId={call.record} partnershipId={call.partnership_id} />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right pl-5 pr-5">{formatDuration(call.time)}</TableCell>
                                 </TableRow>
                             );
                         })}
