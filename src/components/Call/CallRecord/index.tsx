@@ -8,10 +8,11 @@ import { formatTimePlayer } from "@/lib/utils.ts";
 interface CallRecordProps {
     recordId: string;
     partnershipId: string;
-    onPlayStateChange: (isPlaying: boolean) => void;
+    onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
-const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordProps) => {
+
+const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -43,7 +44,6 @@ const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordPr
                     setIsPlaying(false);
                     setCurrentTime(0);
                     setProgress(0);
-                    onPlayStateChange(false);
                 };
 
                 setAudio(newAudio);
@@ -59,10 +59,8 @@ const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordPr
         if (!audio) return;
         if (isPlaying) {
             audio.pause();
-            onPlayStateChange(false);
         } else {
             audio.play();
-            onPlayStateChange(true);
         }
         setIsPlaying(!isPlaying);
     };
@@ -82,7 +80,6 @@ const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordPr
         setIsPlaying(false);
         setCurrentTime(0);
         setProgress(0);
-        onPlayStateChange(false);
     };
 
     if (!audioUrl) {

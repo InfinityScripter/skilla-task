@@ -20,3 +20,10 @@ body {
     @apply font-sans font-normal text-sm leading-[148%] text-[#5e7793] opacity-85;
     font-family: var(--font-family), sans-serif;
 }
+
+.reset-filter {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 171%;
+    color: #5e7793;
+}

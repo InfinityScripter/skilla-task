@@ -1,17 +1,15 @@
-import { useEffect, useState } from 'react';
-import { CallInterface } from '@/types/callTypes';
-import { fetchCalls } from "@/lib/services/callService";
+import { useContext, useState } from "react";
+import { CallContext } from "@/context/CallContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration, formatPhoneNumber, formatTime, getBadgeVariant, getRandomRating } from "@/lib/utils";
-
-import CallInIcon from '@/assets/icons/call_in.svg';
-import CallOutIcon from '@/assets/icons/call_out.svg';
-import MissedInIcon from '@/assets/icons/missed_in.svg';
-import MissedOutIcon from '@/assets/icons/missed_out.svg';
+import { ChevronDown, ChevronUp } from "lucide-react";
+import CallInIcon from "@/assets/icons/call_in.svg";
+import CallOutIcon from "@/assets/icons/call_out.svg";
+import MissedInIcon from "@/assets/icons/missed_in.svg";
+import MissedOutIcon from "@/assets/icons/missed_out.svg";
 import CallRecord from "@/components/Call/CallRecord";
-
 
 const getCallIcon = (in_out: number | undefined, status: string) => {
     if (in_out === 1) {
@@ -25,44 +23,60 @@ const getCallIcon = (in_out: number | undefined, status: string) => {
 };
 
 const CallList = () => {
-    const [calls, setCalls] = useState<CallInterface[]>([]);
-    const [error, setError] = useState<string>('');
-    const [playingCallId, setPlayingCallId] = useState<number | null>(null);
+    const { filteredCalls, loadCalls, setSortOrder } = useContext(CallContext)!;
+    const [sortBy, setSortBy] = useState<string | null>(null);
+    const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
 
-    useEffect(() => {
-        const loadCalls = async () => {
-            try {
-                const data = await fetchCalls('2024-01-01', '2023-01-31');
-                setCalls(data.results);
-            } catch (error) {
-                console.error('Ошибка при получении данных:', error);
-                setError('Не удалось загрузить звонки');
-            }
-        };
+    const handleSortChange = (column: string) => {
+        const newOrder = sortBy === column && order === 'ASC' ? 'DESC' : 'ASC';
+        setSortBy(column);
+        setOrder(newOrder);
+        setSortOrder(`${column}_${newOrder}`);
+        loadCalls(undefined, undefined, undefined, column, newOrder);
+    };
 
-        loadCalls();
-    }, []);
+    const getChevronIcon = (column: string) => {
+        if (sortBy === column) {
+            return order === 'ASC' ? <ChevronUp  size={20} /> : <ChevronDown size={20} />;
+        }
+        return <ChevronDown size={16} />;
+    };
 
     return (
         <div className="bg-white rounded-xl">
-            {error && <p className="text-red-600">{error}</p>}
-            {!error && calls.length === 0 && <p>Загрузка звонков...</p>}
-            {calls.length > 0 && (
+            {filteredCalls.length === 0 && <p>Звонков нет...</p>}
+            {filteredCalls.length > 0 && (
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Время</TableHead>
+                        <TableRow >
+                            <TableHead className="table-header-font  pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
+                            <TableHead
+                                className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer"
+                                onClick={() => handleSortChange('date')}
+                            >
+                                <div className="flex flex-row justify-center content-center gap-2">
+                                Время {getChevronIcon('date')}
+                                </div>
+                            </TableHead>
+
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Сотрудник</TableHead>
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Звонок</TableHead>
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Источник</TableHead>
                             <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Оценка</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5 text-right" colSpan={2}>Длительность</TableHead>
+                            <TableHead
+                                className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer text-right"
+                                onClick={() => handleSortChange('duration')}
+                                colSpan={2}
+                            >
+                                <div className="flex flex-row justify-end content-center gap-2">
+                                    Длительность {getChevronIcon('duration')}
+                                </div>
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
 
                     <TableBody>
-                        {calls.map((call) => {
+                        {filteredCalls.map((call) => {
                             const rating = getRandomRating();
                             return (
                                 <TableRow className="text-left h-[65px] group" key={call.id}>
@@ -82,13 +96,10 @@ const CallList = () => {
                                     </TableCell>
 
                                     <TableCell className="text-right w-[320px]">
-                                        <div className={playingCallId === call.id ? "block" : "group-hover:block hidden"}>
-                                            <CallRecord
-                                                recordId={call.record}
-                                                partnershipId={call.partnership_id}
-                                                onPlayStateChange={(isPlaying) => setPlayingCallId(isPlaying ? call.id : null)}
-                                            />
-                                        </div>
+                                        <CallRecord
+                                            recordId={call.record}
+                                            partnershipId={call.partnership_id}
+                                        />
                                     </TableCell>
                                     <TableCell className="text-right pl-5 pr-5">{formatDuration(call.time)}</TableCell>
                                 </TableRow>

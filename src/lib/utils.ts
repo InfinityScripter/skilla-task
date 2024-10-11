@@ -1,5 +1,6 @@
 import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
+import {subDays} from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -50,4 +51,21 @@ export const formatPhoneNumber = (phoneNumber: string) => {
         return `+${match[1]} (${match[2]}) ${match[3]}-${match[4]}-${match[5]}`;
     }
     return phoneNumber;
+};
+
+
+export const calculateDateRange = (period: string) => {
+    const today = new Date();
+    switch (period) {
+        case "3 дня":
+            return {from: subDays(today, 3), to: today};
+        case "Неделя":
+            return {from: subDays(today, 7), to: today};
+        case "Месяц":
+            return {from: subDays(today, 30), to: today};
+        case "Год":
+            return {from: subDays(today, 365), to: today};
+        default:
+            return {from: subDays(today, 3), to: today};
+    }
 };

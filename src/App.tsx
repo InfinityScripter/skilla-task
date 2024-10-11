@@ -1,12 +1,13 @@
 import './App.css'
 import Home from "@/pages/home";
+import {CallProvider} from "@/context/CallContext.tsx";
 
 function App() {
 
     return (
-        <>
-            <Home/>
-        </>
+        <CallProvider>
+            <Home />
+        </CallProvider>
     )
 }
 
