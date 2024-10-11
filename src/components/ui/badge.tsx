@@ -12,9 +12,9 @@ const badgeVariants = cva(
                 secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
                 destructive: "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
                 outline: "text-foreground",
-                bad: "border-[#ea194f] bg-[#fee9ef] text-[#ea194f] rounded-[4px] font-normal text-[14px] leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
-                good: "border-[#adbfdf] bg-[#d7e4fb] text-[#132945] rounded-[4px] font-normal text-[14px] leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
-                excellent: "border-[#26a879] bg-[#dbf8f0] text-[#26a879] rounded-[4px] font-normal text-[14px] leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
+                bad: "border-[#ea194f] bg-[#fee9ef] text-[#ea194f] rounded-[4px] font-normal text-[14px] font-light leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
+                good: "border-[#adbfdf] bg-[#d7e4fb] text-[#132945] rounded-[4px] font-normal text-[14px] font-light leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
+                excellent: "border-[#26a879] bg-[#dbf8f0] text-[#26a879] rounded-[4px] font-normal text-[14px] font-light leading-[100%] pt-[6px] pb-[6px] pl-[8px] pr-[8px]",
             },
         },
         defaultVariants: {
