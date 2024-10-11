@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { CallInterface } from '@/types/callTypes.ts';
-import { fetchCalls } from "@/lib/services/callService.ts";
+import { CallInterface } from '@/types/callTypes';
+import { fetchCalls } from "@/lib/services/callService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge.tsx";
-import { formatDuration, formatPhoneNumber, formatTime, getBadgeVariant, getRandomRating } from "@/lib/utils.ts";
+import { Badge } from "@/components/ui/badge";
+import { formatDuration, formatPhoneNumber, formatTime, getBadgeVariant, getRandomRating } from "@/lib/utils";
 
 import CallInIcon from '@/assets/icons/call_in.svg';
 import CallOutIcon from '@/assets/icons/call_out.svg';
@@ -27,6 +27,7 @@ const getCallIcon = (in_out: number | undefined, status: string) => {
 const CallList = () => {
     const [calls, setCalls] = useState<CallInterface[]>([]);
     const [error, setError] = useState<string>('');
+    const [playingCallId, setPlayingCallId] = useState<number | null>(null);
 
     useEffect(() => {
         const loadCalls = async () => {
@@ -80,9 +81,13 @@ const CallList = () => {
                                         <Badge variant={getBadgeVariant(rating)}>{rating}</Badge>
                                     </TableCell>
 
-                                    <TableCell className="text-right   w-[320px]" >
-                                        <div className="hidden group-hover:block">
-                                            <CallRecord recordId={call.record} partnershipId={call.partnership_id} />
+                                    <TableCell className="text-right w-[320px]">
+                                        <div className={playingCallId === call.id ? "block" : "group-hover:block hidden"}>
+                                            <CallRecord
+                                                recordId={call.record}
+                                                partnershipId={call.partnership_id}
+                                                onPlayStateChange={(isPlaying) => setPlayingCallId(isPlaying ? call.id : null)}
+                                            />
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right pl-5 pr-5">{formatDuration(call.time)}</TableCell>

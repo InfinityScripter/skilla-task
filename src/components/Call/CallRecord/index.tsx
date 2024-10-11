@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Download, Pause, Play, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { fetchCallRecord } from "@/lib/services/callService";
-import {formatTimePlayer} from "@/lib/utils.ts";
+import { formatTimePlayer } from "@/lib/utils.ts";
 
 interface CallRecordProps {
     recordId: string;
     partnershipId: string;
+    onPlayStateChange: (isPlaying: boolean) => void;
 }
 
-const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
+const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordProps) => {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -42,6 +43,7 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
                     setIsPlaying(false);
                     setCurrentTime(0);
                     setProgress(0);
+                    onPlayStateChange(false);
                 };
 
                 setAudio(newAudio);
@@ -57,8 +59,10 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
         if (!audio) return;
         if (isPlaying) {
             audio.pause();
+            onPlayStateChange(false);
         } else {
             audio.play();
+            onPlayStateChange(true);
         }
         setIsPlaying(!isPlaying);
     };
@@ -78,9 +82,8 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
         setIsPlaying(false);
         setCurrentTime(0);
         setProgress(0);
+        onPlayStateChange(false);
     };
-
-
 
     if (!audioUrl) {
         return null;
