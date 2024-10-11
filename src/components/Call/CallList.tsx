@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useRef } from "react";
 import { CallContext } from "@/context/CallContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -27,9 +27,18 @@ const CallList = () => {
     const { filteredCalls, loadCalls, setSortOrder } = useContext(CallContext)!;
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
-    const [hoveredRow, setHoveredRow] = useState<number | null>(null); // Для отслеживания строки, на которую наведен курсор
+    const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+    const [playingRecords, setPlayingRecords] = useState<{ [key: number]: boolean }>({});
+
 
     const ratingsCache = useRef<{ [key: string]: string }>({});
+
+    const handlePlayStateChange = (callId: number, isPlaying: boolean) => {
+        setPlayingRecords((prevState) => ({
+            ...prevState,
+            [callId]: isPlaying,
+        }));
+    };
 
     const getRating = (callId: string) => {
         if (!ratingsCache.current[callId]) {
@@ -88,7 +97,7 @@ const CallList = () => {
 
                     <TableBody>
                         {filteredCalls.map((call, index) => {
-                            const rating = getRating(call.id);
+                            const rating = getRating(call.id.toString());
                             return (
                                 <TableRow
                                     key={call.id}
@@ -112,10 +121,13 @@ const CallList = () => {
                                     </TableCell>
 
                                     <TableCell className="text-right w-[320px]">
-                                        {hoveredRow === index ? (
+                                        {hoveredRow === index || playingRecords[call.id] ? (
                                             <CallRecord
                                                 recordId={call.record}
                                                 partnershipId={call.partnership_id}
+                                                onPlayStateChange={(isPlaying: boolean) =>
+                                                    handlePlayStateChange(call.id, isPlaying)
+                                                }
                                             />
                                         ) : (
                                             // Если не под курсором, показывать длительность

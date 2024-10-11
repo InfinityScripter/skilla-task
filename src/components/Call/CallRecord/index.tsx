@@ -13,12 +13,18 @@ interface CallRecordProps {
     onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
-const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordProps) => {
+const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState<number>(0);
+
+    useEffect(() => {
+        if (onPlayStateChange) {
+            onPlayStateChange(isPlaying);
+        }
+    }, [isPlaying]);
 
     useEffect(() => {
         const loadRecord = async () => {
@@ -74,10 +80,11 @@ const CallRecord = ({ recordId, partnershipId }: CallRecordProps) => {
         if (!audio) return;
         if (isPlaying) {
             audio.pause();
+            setIsPlaying(false);
         } else {
             audio.play();
+            setIsPlaying(true);
         }
-        setIsPlaying(!isPlaying);
     };
 
     const handleDownload = () => {
