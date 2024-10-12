@@ -59,7 +59,7 @@ const CallList = () => {
         if (sortBy === column) {
             return order === 'ASC' ? <ChevronUp size={20} /> : <ChevronDown size={20} />;
         }
-        return <ChevronDown size={16} />;
+        return <ChevronDown size={20} />;
     };
 
     return (
