@@ -204,7 +204,7 @@ const CallList = () => {
                             })}
                         </TableBody>
                     </Table>
-                    <Pagination>
+                    <Pagination className="text-gray-500">
                         <PaginationContent>
                             <PaginationItem>
                                 <PaginationPrevious
