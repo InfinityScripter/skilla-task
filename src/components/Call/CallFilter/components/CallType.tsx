@@ -25,7 +25,7 @@ const CallType = () => {
     };
 
     return (
-        <div className="flex items-center">
+        <div className="flex items-center text-gray-500">
             <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
                 <DropdownMenuTrigger asChild>
                     <Button className="pl-0 gap-[4px] col-[#5E7793]" variant="ghost">
@@ -40,7 +40,7 @@ const CallType = () => {
                                 key={type}
                                 variant="dropdown"
                                 onClick={() => handleSelectType(type)}
-                                className={callType === type ? 'text-blue-600' : ''}
+                                className={callType === type ? 'text-blue-600' : 'text-gray-500'}
                             >
                                 {type}
                             </Button>

@@ -47,7 +47,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const loadCallsData = async (
         date_start: string = dateRange.start,
         date_end: string = dateRange.end,
-        in_out: string = callType === "Все типы" ? "" : callType,
+        in_out: string = callType === "Все типы" ? "" : callType === "Входящие" ? "1" : "0",
         sort_by: string = sortOrder.split('_')[0],
         order: string = sortOrder.split('_')[1]
     ) => {

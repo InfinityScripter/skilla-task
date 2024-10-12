@@ -53,14 +53,14 @@ const DatePick = ({
     };
 
     return (
-        <div className=" gap-2 text-gray-500">
-            <Button variant="ghost" className="px-2 py-2" onClick={() => handleArrowClick("left")}>
+        <div className="text-gray-500 flex content-baseline">
+            <Button variant="ghost" className="text-gray-500 hover:text-blue-500 " onClick={() => handleArrowClick("left")}>
                 <ChevronLeft />
             </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="px-4 py-2 gap-2 pr-0">
-                        <CalendarIcon size={20} className="ml-auto h-4 w-4 text-gray-400 " />
+                    <Button variant="ghost" className="  gap-2 ">
+                        <CalendarIcon size={24} className="ml-auto h-4 w-4 " />
                         {isCustomDateSelected
                             ? `${format(new Date(dateRange.start), "LLL dd, y")} - ${format(new Date(dateRange.end), "LLL dd, y")}`
                             : activePeriod}
@@ -73,10 +73,10 @@ const DatePick = ({
                                 key={period}
                                 variant="ghost"
                                 onClick={() => updateDateRange(period)}
-                                className={`w-full text-left px-4 py-2 ${
+                                className={`w-full text-left  ${
                                     activePeriod === period && !isCustomDateSelected
-                                        ? "bg-blue-100 text-blue-600"
-                                        : "hover:bg-gray-100"
+                                        ? " text-blue-600"
+                                        : "hover:bg-blue-100"
                                 }`}
                             >
                                 {period}
@@ -89,7 +89,7 @@ const DatePick = ({
                                         id="date"
                                         variant={"ghost"}
                                         className={cn(
-                                            "w-auto h-auto flex flex-col gap-2 justify-start text-left font-normal hover:bg-gray-100",
+                                            "w-auto h-auto flex flex-col gap-2 justify-start text-left font-normal hover:bg-blue-100",
                                             !dateRange && "text-muted-foreground"
                                         )}
                                     >
@@ -128,8 +128,8 @@ const DatePick = ({
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost" className="px-2 py-2" onClick={() => handleArrowClick("right")}>
-                <ChevronRight color="#5E7793" />
+            <Button variant="ghost" className="text-gray-500 hover:text-blue-500" onClick={() => handleArrowClick("right")}>
+                <ChevronRight  />
             </Button>
         </div>
     );
