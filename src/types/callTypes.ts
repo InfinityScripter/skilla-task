@@ -48,6 +48,6 @@ export interface CallInterface {
 }
 
 export interface CallsApiResponse {
-    total_rows: string;
+    total_rows: number;
     results: CallInterface[];
 }

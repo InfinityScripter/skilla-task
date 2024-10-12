@@ -1,12 +1,14 @@
 import axiosInstance from '@/lib/axiosInstance.ts';
-import {CallsApiResponse} from "@/types/callTypes.ts";
+import { CallsApiResponse } from "@/types/callTypes.ts";
 
 export const fetchCalls = async (
     date_start: string,
     date_end: string,
     in_out: string = '',
     sort_by: string = '',
-    order: string = ''
+    order: string = '',
+    limit: number = 50,
+    offset: number = 0
 ) => {
     const response = await axiosInstance.post<CallsApiResponse>(
         '/getList',
@@ -18,6 +20,8 @@ export const fetchCalls = async (
                 in_out,
                 sort_by,
                 order,
+                limit,
+                offset,
             },
         }
     );

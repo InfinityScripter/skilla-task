@@ -10,8 +10,14 @@ import CallOutIcon from "@/assets/icons/call_out.svg";
 import MissedInIcon from "@/assets/icons/missed_in.svg";
 import MissedOutIcon from "@/assets/icons/missed_out.svg";
 import CallRecord from "@/components/Call/CallRecord";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem, PaginationLink,
+    PaginationNext,
+    PaginationPrevious
+} from "@/components/ui/pagination.tsx";
 
-// Функция для получения иконки звонка
 const getCallIcon = (in_out: number | undefined, status: string) => {
     if (in_out === 1) {
         if (status === 'Не дозвонился') return <img className="text-center" src={MissedInIcon} alt="Пропущенный входящий звонок" />;
@@ -24,12 +30,18 @@ const getCallIcon = (in_out: number | undefined, status: string) => {
 };
 
 const CallList = () => {
-    const { filteredCalls, loadCalls, setSortOrder } = useContext(CallContext)!;
+    const {
+        filteredCalls,
+        setSortOrder,
+        currentPage,
+        setCurrentPage,
+        totalPages,
+    } = useContext(CallContext)!;
+
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
     const [hoveredRow, setHoveredRow] = useState<number | null>(null);
     const [playingRecords, setPlayingRecords] = useState<{ [key: number]: boolean }>({});
-
 
     const ratingsCache = useRef<{ [key: string]: string }>({});
 
@@ -52,7 +64,6 @@ const CallList = () => {
         setSortBy(column);
         setOrder(newOrder);
         setSortOrder(`${column}_${newOrder}`);
-        loadCalls(undefined, undefined, undefined, column, newOrder);
     };
 
     const getChevronIcon = (column: string) => {
@@ -62,83 +73,155 @@ const CallList = () => {
         return <ChevronDown size={20} />;
     };
 
+    const handlePageChange = (page: number) => {
+        if (page > 0 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
+    const renderPageNumbers = () => {
+        const pages = [];
+
+        if (currentPage > 2) {
+            pages.push(
+                <PaginationItem key={1}>
+                    <PaginationLink href="#" onClick={() => handlePageChange(1)}>1</PaginationLink>
+                </PaginationItem>
+            );
+        }
+
+        if (currentPage > 3) {
+            pages.push(<PaginationItem key="left-ellipsis">...</PaginationItem>);
+        }
+
+        const startPage = Math.max(1, currentPage - 1);
+        const endPage = Math.min(totalPages, currentPage + 1);
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <PaginationItem key={i}>
+                    <PaginationLink
+                        href="#"
+                        onClick={() => handlePageChange(i)}
+                        isActive={currentPage === i}
+                    >
+                        {i}
+                    </PaginationLink>
+                </PaginationItem>
+            );
+        }
+
+        if (currentPage < totalPages - 2) {
+            pages.push(<PaginationItem key="right-ellipsis">...</PaginationItem>);
+        }
+
+        if (currentPage < totalPages - 1) {
+            pages.push(
+                <PaginationItem key={totalPages}>
+                    <PaginationLink href="#" onClick={() => handlePageChange(totalPages)}>
+                        {totalPages}
+                    </PaginationLink>
+                </PaginationItem>
+            );
+        }
+
+        return pages;
+    };
+
     return (
         <div className="bg-white rounded-xl">
             {filteredCalls.length === 0 && <p>Звонков нет...</p>}
             {filteredCalls.length > 0 && (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="table-header-font  pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
-                            <TableHead
-                                className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer"
-                                onClick={() => handleSortChange('date')}
-                            >
-                                <div className="flex flex-row justify-center content-center gap-2">
-                                    Время {getChevronIcon('date')}
-                                </div>
-                            </TableHead>
-
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Сотрудник</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Звонок</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Источник</TableHead>
-                            <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Оценка</TableHead>
-                            <TableHead
-                                className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer text-right"
-                                onClick={() => handleSortChange('duration')}
-                                colSpan={2}
-                            >
-                                <div className="flex flex-row justify-end content-center gap-2">
-                                    Длительность {getChevronIcon('duration')}
-                                </div>
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                        {filteredCalls.map((call, index) => {
-                            const rating = getRating(call.id.toString());
-                            return (
-                                <TableRow
-                                    key={call.id}
-                                    className="text-left h-[65px] group"
-                                    onMouseEnter={() => setHoveredRow(index)}
-                                    onMouseLeave={() => setHoveredRow(null)}
+                <>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="table-header-font  pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
+                                <TableHead
+                                    className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer"
+                                    onClick={() => handleSortChange('date')}
                                 >
-                                    <TableCell className="pl-5 pr-5">{getCallIcon(call.in_out, call.status)}</TableCell>
-                                    <TableCell className="pl-5 pr-5">{formatTime(call.date)}</TableCell>
-                                    <TableCell className="pl-5 pr-5">
-                                        <Avatar>
-                                            <AvatarImage src={call.person_avatar} alt={call.person_name} />
-                                        </Avatar>
-                                    </TableCell>
-                                    <TableCell className="pl-5 pr-5">
-                                        {formatPhoneNumber(call.partner_data.phone)}
-                                    </TableCell>
-                                    <TableCell className="pl-5 pr-5">{call.contact_company}</TableCell>
-                                    <TableCell className="pl-5 pr-5">
-                                        <Badge variant={getBadgeVariant(rating)}>{rating}</Badge>
-                                    </TableCell>
+                                    <div className="flex flex-row justify-center content-center gap-2">
+                                        Время {getChevronIcon('date')}
+                                    </div>
+                                </TableHead>
 
-                                    <TableCell className="text-right w-[320px]">
-                                        {hoveredRow === index || playingRecords[call.id] ? (
-                                            <CallRecord
-                                                recordId={call.record}
-                                                partnershipId={call.partnership_id}
-                                                onPlayStateChange={(isPlaying: boolean) =>
-                                                    handlePlayStateChange(call.id, isPlaying)
-                                                }
-                                            />
-                                        ) : (
-                                            // Если не под курсором, показывать длительность
-                                            <span className="pl-5 pr-5 text-right">{formatDuration(call.time)}</span>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
+                                <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Сотрудник</TableHead>
+                                <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Звонок</TableHead>
+                                <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Источник</TableHead>
+                                <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Оценка</TableHead>
+                                <TableHead
+                                    className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer text-right"
+                                    onClick={() => handleSortChange('duration')}
+                                    colSpan={2}
+                                >
+                                    <div className="flex flex-row justify-end content-center gap-2">
+                                        Длительность {getChevronIcon('duration')}
+                                    </div>
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+
+                        <TableBody>
+                            {filteredCalls.map((call, index) => {
+                                const rating = getRating(call.id.toString());
+                                return (
+                                    <TableRow
+                                        key={call.id}
+                                        className="text-left h-[65px] group"
+                                        onMouseEnter={() => setHoveredRow(index)}
+                                        onMouseLeave={() => setHoveredRow(null)}
+                                    >
+                                        <TableCell className="pl-5 pr-5">{getCallIcon(call.in_out, call.status)}</TableCell>
+                                        <TableCell className="pl-5 pr-5">{formatTime(call.date)}</TableCell>
+                                        <TableCell className="pl-5 pr-5">
+                                            <Avatar>
+                                                <AvatarImage src={call.person_avatar} alt={call.person_name} />
+                                            </Avatar>
+                                        </TableCell>
+                                        <TableCell className="pl-5 pr-5">
+                                            {formatPhoneNumber(call.partner_data.phone)}
+                                        </TableCell>
+                                        <TableCell className="pl-5 pr-5">{call.contact_company}</TableCell>
+                                        <TableCell className="pl-5 pr-5">
+                                            <Badge variant={getBadgeVariant(rating)}>{rating}</Badge>
+                                        </TableCell>
+
+                                        <TableCell className="text-right w-[320px]">
+                                            {hoveredRow === index || playingRecords[call.id] ? (
+                                                <CallRecord
+                                                    recordId={call.record}
+                                                    partnershipId={call.partnership_id}
+                                                    onPlayStateChange={(isPlaying: boolean) =>
+                                                        handlePlayStateChange(call.id, isPlaying)
+                                                    }
+                                                />
+                                            ) : (
+                                                <span className="pl-5 pr-5 text-right">{formatDuration(call.time)}</span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href="#"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                />
+                            </PaginationItem>
+                            {renderPageNumbers()}
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </>
             )}
         </div>
     );
