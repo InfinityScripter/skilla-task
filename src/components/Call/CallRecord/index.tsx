@@ -126,7 +126,7 @@ const [audioUrl, setAudioUrl] = useState<string | null>(null);
                 )}
             </Button>
             <div className="flex-grow mx-2">
-                <Progress value={progress} className="bg-gray-200 h-[4px] w-[80px] rounded-full" />
+                <Progress value={progress} className="bg-gray-200 h-[4px] w-[100px] rounded-full" />
             </div>
             <Button
                 size="icon"
