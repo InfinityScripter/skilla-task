@@ -1,10 +1,9 @@
-
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Pause, Play, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { fetchCallRecord } from "@/lib/services/callService";
-import { formatTimePlayer } from "@/lib/utils";
+import { formatTimePlayer } from "@/lib/utils.ts";
 
 const callRecordCache = new Map<string, string>();
 
@@ -14,40 +13,51 @@ interface CallRecordProps {
     onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
-const CallRecord: React.FC<CallRecordProps> = ({ recordId, partnershipId, onPlayStateChange }) => {
+const CallRecord = ({ recordId, partnershipId, onPlayStateChange }: CallRecordProps) => {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState<number>(0);
-    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        if (onPlayStateChange) {
+            onPlayStateChange(isPlaying);
+        }
+    }, [isPlaying]);
 
     useEffect(() => {
         const loadRecord = async () => {
-            if (!recordId) return;
-
-            if (callRecordCache.has(recordId)) {
-                const cachedAudioUrl = callRecordCache.get(recordId)!;
-                setAudioUrl(cachedAudioUrl);
-                const newAudio = new Audio(cachedAudioUrl);
-                setupAudio(newAudio);
-            } else {
-                try {
-                    const audioBlob = await fetchCallRecord(recordId, partnershipId);
-                    const newAudioUrl = URL.createObjectURL(audioBlob);
-                    callRecordCache.set(recordId, newAudioUrl);
-                    setAudioUrl(newAudioUrl);
-                    const newAudio = new Audio(newAudioUrl);
-                    setupAudio(newAudio);
-                } catch (error) {
-                    console.error("Ошибка при загрузке записи:", error);
+            try {
+                if (!recordId) {
+                    return;
                 }
+
+                if (callRecordCache.has(recordId)) {
+                    const cachedAudioUrl = callRecordCache.get(recordId);
+                    setAudioUrl(cachedAudioUrl!);
+                    const newAudio = new Audio(cachedAudioUrl!);
+                    setupAudio(newAudio);
+                    return;
+                }
+
+                const audioBlob = await fetchCallRecord(recordId, partnershipId);
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                callRecordCache.set(recordId, audioUrl);
+
+                setAudioUrl(audioUrl);
+                const newAudio = new Audio(audioUrl);
+                setupAudio(newAudio);
+            } catch (error) {
+                console.error("Ошибка при получении записи:", error);
             }
         };
 
         loadRecord();
     }, [recordId, partnershipId]);
 
-    const setupAudio = useCallback((newAudio: HTMLAudioElement) => {
+    const setupAudio = (newAudio: HTMLAudioElement) => {
         newAudio.onloadedmetadata = () => {
             setProgress(0);
         };
@@ -64,16 +74,9 @@ const CallRecord: React.FC<CallRecordProps> = ({ recordId, partnershipId, onPlay
         };
 
         setAudio(newAudio);
-    }, []);
+    };
 
-    useEffect(() => {
-        if (onPlayStateChange) {
-            onPlayStateChange(isPlaying);
-        }
-    }, [isPlaying, onPlayStateChange]);
-
-
-    const handlePlayPause = useCallback(() => {
+    const handlePlayPause = () => {
         if (!audio) return;
         if (isPlaying) {
             audio.pause();
@@ -82,24 +85,24 @@ const CallRecord: React.FC<CallRecordProps> = ({ recordId, partnershipId, onPlay
             audio.play();
             setIsPlaying(true);
         }
-    }, [audio, isPlaying]);
+    };
 
-    const handleDownload = useCallback(() => {
+    const handleDownload = () => {
         if (!audioUrl) return;
         const link = document.createElement("a");
         link.href = audioUrl;
         link.download = `record_${recordId}.mp3`;
         link.click();
-    }, [audioUrl, recordId]);
+    };
 
-    const handleReset = useCallback(() => {
+    const handleReset = () => {
         if (!audio) return;
         audio.pause();
         audio.currentTime = 0;
         setIsPlaying(false);
         setCurrentTime(0);
         setProgress(0);
-    }, [audio]);
+    };
 
     if (!audioUrl) {
         return null;
@@ -107,14 +110,14 @@ const CallRecord: React.FC<CallRecordProps> = ({ recordId, partnershipId, onPlay
 
     return (
         <div className="flex items-center bg-[#eaf0fa] rounded-[48px] p-1.5">
-            <span className="text-sm text-gray-700 mx-2">
+            <span className="text-sm text-gray-700 mx-2 ">
                 {formatTimePlayer(currentTime)}
             </span>
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={handlePlayPause}
-                className="mx-2 rounded-full bg-white hover:bg-white"
+                className={`mx-2 rounded-full bg-white hover:bg-white`}
             >
                 {isPlaying ? (
                     <Pause size={20} className="text-blue-600 fill-current" />
@@ -143,4 +146,4 @@ const CallRecord: React.FC<CallRecordProps> = ({ recordId, partnershipId, onPlay
     );
 };
 
-export default React.memo(CallRecord);
+export default CallRecord;
