@@ -1,20 +1,22 @@
+import React, { useContext, useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { calculateDateRange, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useContext, useState } from "react";
 import { CallContext } from "@/context/CallContext";
 import { DateRange } from "react-day-picker";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger} from "@radix-ui/react-dropdown-menu";
+
+interface DatePickProps {
+    onDateChange?: (range: { start: string; end: string }) => void;
+}
 
 const periods = ["3 дня", "Неделя", "Месяц", "Год"];
 
-const DatePick = ({
-                      className,
-                  }: React.HTMLAttributes<HTMLDivElement>) => {
-    const { dateRange, setDateRange } = useContext(CallContext)!;
+const DatePick: React.FC<DatePickProps> = ({ onDateChange }) => {
+    const { dateRange } = useContext(CallContext)!;
     const [activePeriod, setActivePeriod] = useState("3 дня");
     const [isCustomDateSelected, setIsCustomDateSelected] = useState(false);
 
@@ -22,7 +24,7 @@ const DatePick = ({
     const updateDateRange = (newPeriod: string) => {
         setActivePeriod(newPeriod);
         const newRange = calculateDateRange(newPeriod);
-        setDateRange({
+        onDateChange?.({
             start: format(newRange.from, "yyyy-MM-dd"),
             end: format(newRange.to, "yyyy-MM-dd"),
         });
@@ -39,12 +41,12 @@ const DatePick = ({
 
     const handleDateSelect = (range: DateRange | undefined) => {
         if (range?.from && !range.to) {
-            setDateRange({
+            onDateChange?.({
                 start: format(range.from, "yyyy-MM-dd"),
                 end: format(range.from, "yyyy-MM-dd"),
             });
         } else if (range?.from && range?.to) {
-            setDateRange({
+            onDateChange?.({
                 start: format(range.from, "yyyy-MM-dd"),
                 end: format(range.to, "yyyy-MM-dd"),
             });
@@ -82,7 +84,7 @@ const DatePick = ({
                                 {period}
                             </Button>
                         ))}
-                        <div className={cn("grid gap-2", className)}>
+                        <div className={cn("grid gap-2")}>
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -135,4 +137,4 @@ const DatePick = ({
     );
 };
 
-export default DatePick;
+export default React.memo(DatePick);

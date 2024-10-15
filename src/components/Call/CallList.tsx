@@ -10,13 +10,7 @@ import CallOutIcon from "@/assets/icons/call_out.svg";
 import MissedInIcon from "@/assets/icons/missed_in.svg";
 import MissedOutIcon from "@/assets/icons/missed_out.svg";
 import CallRecord from "@/components/Call/CallRecord";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem, PaginationLink,
-    PaginationNext,
-    PaginationPrevious
-} from "@/components/ui/pagination.tsx";
+import PaginationComponent from "@/components/Call/Pagination";
 
 const getCallIcon = (in_out: number | undefined, status: string) => {
     if (in_out === 1) {
@@ -73,60 +67,6 @@ const CallList = () => {
         return <ChevronDown size={20} />;
     };
 
-    const handlePageChange = (page: number) => {
-        if (page > 0 && page <= totalPages) {
-            setCurrentPage(page);
-        }
-    };
-
-    const renderPageNumbers = () => {
-        const pages = [];
-
-        if (currentPage > 2) {
-            pages.push(
-                <PaginationItem key={1}>
-                    <PaginationLink href="#" onClick={() => handlePageChange(1)}>1</PaginationLink>
-                </PaginationItem>
-            );
-        }
-
-        if (currentPage > 3) {
-            pages.push(<PaginationItem key="left-ellipsis">...</PaginationItem>);
-        }
-
-        const startPage = Math.max(1, currentPage - 1);
-        const endPage = Math.min(totalPages, currentPage + 1);
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(
-                <PaginationItem key={i}>
-                    <PaginationLink
-                        href="#"
-                        onClick={() => handlePageChange(i)}
-                        isActive={currentPage === i}
-                    >
-                        {i}
-                    </PaginationLink>
-                </PaginationItem>
-            );
-        }
-
-        if (currentPage < totalPages - 2) {
-            pages.push(<PaginationItem key="right-ellipsis">...</PaginationItem>);
-        }
-
-        if (currentPage < totalPages - 1) {
-            pages.push(
-                <PaginationItem key={totalPages}>
-                    <PaginationLink href="#" onClick={() => handlePageChange(totalPages)}>
-                        {totalPages}
-                    </PaginationLink>
-                </PaginationItem>
-            );
-        }
-
-        return pages;
-    };
-
     return (
         <div className="bg-white rounded-xl">
             {filteredCalls.length === 0 && <p>Звонков нет...</p>}
@@ -135,7 +75,7 @@ const CallList = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="table-header-font  pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
+                                <TableHead className="table-header-font pt-5 pb-6 pl-5 pr-5">Тип</TableHead>
                                 <TableHead
                                     className="table-header-font pt-5 pb-6 pl-5 pr-5 cursor-pointer"
                                     onClick={() => handleSortChange('date')}
@@ -204,23 +144,11 @@ const CallList = () => {
                             })}
                         </TableBody>
                     </Table>
-                    <Pagination className="text-gray-500">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                />
-                            </PaginationItem>
-                            {renderPageNumbers()}
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
                 </>
             )}
         </div>
